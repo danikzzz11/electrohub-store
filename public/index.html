@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ElectroHub — Интернет-магазин электроники и гаджетов</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="/css/style.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              900: '#1e3a8a',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased text-xs sm:text-sm">
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- Header with integrated Category Navigation -->
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xs">
+    
+    <!-- Top Row: Logo, Search, Currency, Cart -->
+    <div class="max-w-7xl mx-auto px-3 sm:px-6">
+      <div class="flex items-center justify-between h-14 gap-3">
+        
+        <!-- Logo -->
+        <a href="/" class="flex items-center gap-2 group flex-shrink-0">
+          <div class="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center text-white shadow-xs group-hover:bg-blue-700 transition-colors">
+            <i data-lucide="zap" class="w-4 h-4"></i>
+          </div>
+          <span class="text-sm font-bold tracking-tight text-slate-900">ElectroHub</span>
+        </a>
+
+        <!-- Search Bar -->
+        <div class="flex-1 max-w-md hidden md:block">
+          <div class="relative">
+            <input 
+              type="text" 
+              id="searchInput" 
+              placeholder="Поиск по каталогу..." 
+              class="w-full pl-8 pr-7 py-1.5 bg-slate-100 hover:bg-slate-50 focus:bg-white border border-transparent focus:border-blue-500 rounded-lg text-xs transition-all outline-none"
+            >
+            <i data-lucide="search" class="w-3.5 h-3.5 absolute left-2.5 top-2 text-slate-400"></i>
+            <button id="clearSearchBtn" class="hidden absolute right-2.5 top-2 text-slate-400 hover:text-slate-600">
+              <i data-lucide="x" class="w-3 h-3"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Right Action Buttons -->
+        <div class="flex items-center gap-2">
+          <!-- Currency Switcher -->
+          <div class="relative" id="currencyDropdownWrapper">
+            <button 
+              id="currencySelectBtn" 
+              type="button" 
+              class="flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 transition-all cursor-pointer select-none"
+              title="Сменить валюту"
+            >
+              <span id="currentCurrencyFlag" class="text-xs">🇷🇺</span>
+              <span id="currentCurrencyLabel" class="text-xs">RUB (₽)</span>
+              <i data-lucide="chevron-down" class="w-3 h-3 text-slate-400"></i>
+            </button>
+
+            <!-- Currency Menu -->
+            <div id="currencyDropdownMenu" class="hidden absolute right-0 mt-1.5 w-40 bg-white rounded-xl shadow-xl border border-slate-200 py-1 z-50">
+              <button type="button" onclick="setCurrency('RUB')" class="w-full px-3 py-1.5 text-left text-xs font-medium hover:bg-blue-50 hover:text-blue-600 flex items-center justify-between transition-colors">
+                <span class="flex items-center gap-1.5"><span>🇷🇺</span> <span>RUB (₽)</span></span>
+              </button>
+              <button type="button" onclick="setCurrency('USD')" class="w-full px-3 py-1.5 text-left text-xs font-medium hover:bg-blue-50 hover:text-blue-600 flex items-center justify-between transition-colors">
+                <span class="flex items-center gap-1.5"><span>🇺🇸</span> <span>USD ($)</span></span>
+              </button>
+              <button type="button" onclick="setCurrency('EUR')" class="w-full px-3 py-1.5 text-left text-xs font-medium hover:bg-blue-50 hover:text-blue-600 flex items-center justify-between transition-colors">
+                <span class="flex items-center gap-1.5"><span>🇪🇺</span> <span>EUR (€)</span></span>
+              </button>
+              <button type="button" onclick="setCurrency('KZT')" class="w-full px-3 py-1.5 text-left text-xs font-medium hover:bg-blue-50 hover:text-blue-600 flex items-center justify-between transition-colors">
+                <span class="flex items-center gap-1.5"><span>🇰🇿</span> <span>KZT (₸)</span></span>
+              </button>
+              <button type="button" onclick="setCurrency('BYN')" class="w-full px-3 py-1.5 text-left text-xs font-medium hover:bg-blue-50 hover:text-blue-600 flex items-center justify-between transition-colors">
+                <span class="flex items-center gap-1.5"><span>🇧🇾</span> <span>BYN (Br)</span></span>
+              </button>
+              <button type="button" onclick="setCurrency('TRY')" class="w-full px-3 py-1.5 text-left text-xs font-medium hover:bg-blue-50 hover:text-blue-600 flex items-center justify-between transition-colors">
+                <span class="flex items-center gap-1.5"><span>🇹🇷</span> <span>TRY (₺)</span></span>
+              </button>
+              <button type="button" onclick="setCurrency('AED')" class="w-full px-3 py-1.5 text-left text-xs font-medium hover:bg-blue-50 hover:text-blue-600 flex items-center justify-between transition-colors">
+                <span class="flex items-center gap-1.5"><span>🇦🇪</span> <span>AED (د.إ)</span></span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Cart Button -->
+          <button id="cartBtn" class="relative flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-medium text-xs rounded-lg shadow-xs transition-all cursor-pointer">
+            <i data-lucide="shopping-bag" class="w-3.5 h-3.5"></i>
+            <span class="hidden sm:inline">Корзина</span>
+            <span id="cartCountBadge" class="bg-white text-blue-600 text-[10px] font-bold px-1.5 py-0.2 rounded-full">0</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Mobile Search Bar -->
+      <div class="pb-2 md:hidden">
+        <div class="relative">
+          <input 
+            type="text" 
+            id="mobileSearchInput" 
+            placeholder="Поиск по каталогу..." 
+            class="w-full pl-8 pr-3 py-1.5 bg-slate-100 border border-slate-200 rounded-lg text-xs outline-none focus:border-blue-500"
+          >
+          <i data-lucide="search" class="w-3.5 h-3.5 absolute left-2.5 top-2 text-slate-400"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Row: Category Navigation Tabs (Moved directly to the Header!) -->
+    <div class="border-t border-slate-100 bg-slate-50/70">
+      <div class="max-w-7xl mx-auto px-3 sm:px-6">
+        <div id="categoryTabs" class="flex items-center gap-1 py-1.5 overflow-x-auto scrollbar-none text-xs">
+          <button data-category="" class="cat-pill active flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-semibold transition-all bg-blue-600 text-white whitespace-nowrap shadow-xs">
+            <span>Все товары</span>
+            <span id="allCountBadge" class="text-[10px] bg-white/20 px-1 rounded-full">0</span>
+          </button>
+          <!-- Dynamically injected category buttons -->
+        </div>
+      </div>
+    </div>
+
+  </header>
+
+  <!-- Catalog Main Section (Immediately visible, no bulky hero) -->
+  <main class="max-w-7xl mx-auto px-3 sm:px-6 py-4 flex-1 w-full">
+
+    <!-- Compact Controls Bar -->
+    <div class="flex items-center justify-between gap-3 pb-3 mb-3 border-b border-slate-200 text-xs">
+      <div class="flex items-center gap-3">
+        <span class="text-slate-500">Найдено: <strong id="productsCount" class="text-slate-800">0</strong></span>
+        <span class="text-slate-300">|</span>
+        <label class="flex items-center gap-1.5 cursor-pointer select-none text-slate-600 hover:text-blue-600 transition-colors">
+          <input type="checkbox" id="inStockCheckbox" class="w-3.5 h-3.5 rounded text-blue-600 focus:ring-blue-500 border-slate-300">
+          <span>В наличии</span>
+        </label>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <span class="text-slate-400 hidden sm:inline">Сортировка:</span>
+        <select id="sortSelect" class="bg-white border border-slate-200 text-slate-700 text-xs rounded-lg px-2 py-1 outline-none cursor-pointer focus:border-blue-500">
+          <option value="newest">Новинки</option>
+          <option value="price_asc">Сначала недорогие</option>
+          <option value="price_desc">Сначала премиум</option>
+          <option value="name_asc">По названию (А-Я)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Compact Product Grid (5 columns on desktop, 2 on mobile) -->
+    <div id="productsGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+      <!-- Loading skeletons or products injected here -->
+      <div class="col-span-full py-12 text-center text-slate-400 text-xs">
+        <div class="inline-block w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mb-2"></div>
+        <p>Загрузка товаров...</p>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div id="emptyCatalogState" class="hidden py-12 text-center max-w-sm mx-auto">
+      <div class="w-12 h-12 bg-slate-100 text-slate-400 rounded-xl flex items-center justify-center mx-auto mb-3">
+        <i data-lucide="package-search" class="w-6 h-6"></i>
+      </div>
+      <h3 class="text-sm font-bold text-slate-800 mb-1">Ничего не найдено</h3>
+      <p class="text-xs text-slate-500 mb-3">Попробуйте изменить поисковый запрос или фильтр</p>
+      <button id="resetFiltersBtn" class="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium text-xs rounded-lg transition-all">
+        Сбросить фильтры
+      </button>
+    </div>
+
+  </main>
+
+  <!-- Clean, Minimal 1-line Footer -->
+  <footer class="bg-white border-t border-slate-200 py-4 mt-8 text-slate-400 text-xs">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 flex items-center justify-between">
+      <div><span class="font-bold text-slate-700">ElectroHub</span> &copy; 2026</div>
+      <div class="text-[11px]">Официальная гарантия • Быстрая доставка</div>
+    </div>
+  </footer>
+
+  <!-- Slide-over Shopping Cart Drawer (Compact) -->
+  <div id="cartDrawerBackdrop" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 opacity-0 pointer-events-none transition-opacity duration-200">
+    <div id="cartDrawer" class="absolute top-0 right-0 h-full w-full max-w-sm bg-white shadow-2xl flex flex-col transform translate-x-full transition-transform duration-200">
+      
+      <!-- Cart Header -->
+      <div class="p-3.5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+        <div class="flex items-center gap-2">
+          <i data-lucide="shopping-cart" class="w-4 h-4 text-blue-600"></i>
+          <h2 class="font-bold text-slate-800 text-sm">Корзина</h2>
+          <span id="drawerItemsCount" class="text-[10px] bg-blue-100 text-blue-700 font-bold px-1.5 py-0.2 rounded-full">0</span>
+        </div>
+        <button id="closeCartBtn" class="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-200 rounded-lg transition-colors cursor-pointer">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Cart Items List -->
+      <div id="cartItemsContainer" class="flex-1 overflow-y-auto p-3 space-y-2.5">
+        <!-- Rendered items here -->
+      </div>
+
+      <!-- Empty Cart Message -->
+      <div id="emptyCartMessage" class="hidden flex-1 flex flex-col items-center justify-center p-6 text-center">
+        <div class="w-12 h-12 bg-blue-50 text-blue-500 rounded-xl flex items-center justify-center mb-3">
+          <i data-lucide="shopping-bag" class="w-6 h-6"></i>
+        </div>
+        <h4 class="font-bold text-slate-800 text-xs mb-1">Корзина пуста</h4>
+        <p class="text-[11px] text-slate-400 mb-4">Выберите понравившийся товар в каталоге</p>
+        <button id="exploreCatalogBtn" class="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow-xs transition-all">
+          В каталог
+        </button>
+      </div>
+
+      <!-- Cart Footer & Checkout Action -->
+      <div id="cartFooter" class="p-3.5 border-t border-slate-200 bg-slate-50 space-y-2">
+        <div class="flex items-center justify-between text-xs text-slate-500">
+          <span>Сумма:</span>
+          <span id="cartSubtotal" class="font-semibold text-slate-800">0 ₽</span>
+        </div>
+        <div class="pt-1.5 border-t border-slate-200 flex items-center justify-between text-sm">
+          <span class="font-bold text-slate-800">Итого:</span>
+          <span id="cartTotal" class="font-extrabold text-blue-600">0 ₽</span>
+        </div>
+        <button id="proceedToCheckoutBtn" class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 active:scale-[0.99] text-white font-bold text-xs rounded-lg shadow-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+          <span>Оформить заказ</span>
+          <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Product Quick View Modal (Compact) -->
+  <div id="quickViewModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 hidden items-center justify-center p-3">
+    <div class="bg-white rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl modal-enter relative">
+      <button id="closeQuickViewBtn" class="absolute top-2.5 right-2.5 z-10 w-7 h-7 bg-white/90 hover:bg-white text-slate-500 hover:text-slate-800 rounded-full flex items-center justify-center shadow-xs transition-all cursor-pointer">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2">
+        <div class="bg-slate-50 flex items-center justify-center p-4 relative">
+          <img id="qvImage" src="" alt="" class="max-h-48 object-contain">
+          <span id="qvStockBadge" class="absolute bottom-2.5 left-2.5 text-[10px] font-semibold px-2 py-0.5 rounded-md"></span>
+        </div>
+        <div class="p-4 flex flex-col justify-between">
+          <div>
+            <span id="qvCategory" class="text-[10px] uppercase font-bold tracking-wider text-blue-600"></span>
+            <h3 id="qvTitle" class="text-sm font-bold text-slate-900 mt-0.5 mb-1.5 leading-snug"></h3>
+            <div class="flex items-baseline gap-2 mb-2.5">
+              <span id="qvPrice" class="text-lg font-extrabold text-slate-900"></span>
+              <span id="qvOldPrice" class="text-xs line-through text-slate-400"></span>
+            </div>
+            <p id="qvDescription" class="text-[11px] text-slate-600 mb-2.5 leading-relaxed line-clamp-3"></p>
+            <div class="bg-slate-50 p-2 rounded-lg border border-slate-100 text-[11px] text-slate-600 mb-3">
+              <div id="qvSpecs"></div>
+            </div>
+          </div>
+
+          <div>
+            <button id="qvAddToCartBtn" class="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs rounded-lg shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+              <i data-lucide="shopping-bag" class="w-3.5 h-3.5"></i>
+              <span>Добавить в корзину</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Checkout Modal (Compact) -->
+  <div id="checkoutModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 hidden items-center justify-center p-3">
+    <div class="bg-white rounded-2xl max-w-md w-full overflow-hidden shadow-2xl modal-enter relative">
+      <div class="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+        <div>
+          <h3 class="text-sm font-bold text-slate-900">Оформление заказа</h3>
+        </div>
+        <button id="closeCheckoutBtn" class="p-1 text-slate-400 hover:text-slate-600 rounded-lg transition-colors cursor-pointer">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <form id="checkoutForm" class="p-4 space-y-3 max-h-[75vh] overflow-y-auto text-xs">
+        <div>
+          <label class="block font-medium text-slate-700 mb-1">Имя и Фамилия *</label>
+          <input 
+            type="text" 
+            name="customerName" 
+            required 
+            placeholder="Иван Иванов" 
+            class="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs outline-none focus:border-blue-500 focus:bg-white"
+          >
+        </div>
+
+        <div>
+          <label class="block font-medium text-slate-700 mb-1">Номер телефона *</label>
+          <div class="relative flex items-center">
+            <!-- Country Roulette Trigger Button -->
+            <button 
+              type="button" 
+              id="countrySelectBtn" 
+              class="flex items-center gap-1 px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 border border-r-0 border-slate-200 rounded-l-lg text-xs font-semibold text-slate-800 transition-colors flex-shrink-0 cursor-pointer select-none"
+              title="Выбрать страну"
+            >
+              <span id="selectedCountryFlag" class="text-sm leading-none">🇷🇺</span>
+              <span id="selectedCountryDial" class="font-mono text-xs">+7</span>
+              <i data-lucide="chevron-down" class="w-3 h-3 text-slate-400"></i>
+            </button>
+
+            <!-- Phone Number Input -->
+            <input 
+              type="tel" 
+              id="phoneLocalInput" 
+              required 
+              placeholder="(999) 123-45-67" 
+              class="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-r-lg text-xs outline-none focus:border-blue-500 focus:bg-white font-mono"
+            >
+
+            <!-- Hidden Input with Complete International Phone Number for Order Submission -->
+            <input type="hidden" name="customerPhone" id="fullPhoneHidden" value="">
+
+            <!-- Country Roulette Dropdown Menu -->
+            <div 
+              id="countryDropdownMenu" 
+              class="hidden absolute top-full left-0 mt-1 w-64 max-h-56 bg-white rounded-xl shadow-2xl border border-slate-200 z-50 overflow-hidden flex flex-col"
+            >
+              <!-- Search bar in roulette -->
+              <div class="p-1.5 border-b border-slate-100 bg-slate-50">
+                <div class="relative">
+                  <input 
+                    type="text" 
+                    id="countrySearchInput" 
+                    placeholder="Поиск страны или кода..." 
+                    class="w-full pl-7 pr-2 py-1 bg-white border border-slate-200 rounded-md text-xs outline-none focus:border-blue-500"
+                  >
+                  <i data-lucide="search" class="w-3 h-3 absolute left-2 top-1.5 text-slate-400"></i>
+                </div>
+              </div>
+
+              <!-- Scrollable roulette list -->
+              <div id="countriesListContainer" class="overflow-y-auto max-h-44 divide-y divide-slate-100 p-1">
+                <!-- Populated dynamically via JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-medium text-slate-700 mb-1">Email (необязательно)</label>
+          <input 
+            type="email" 
+            name="customerEmail" 
+            placeholder="example@mail.ru" 
+            class="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs outline-none focus:border-blue-500 focus:bg-white"
+          >
+        </div>
+
+        <div>
+          <label class="block font-medium text-slate-700 mb-1">Адрес доставки *</label>
+          <input 
+            type="text" 
+            name="customerAddress" 
+            required 
+            placeholder="Город, улица, дом, кв." 
+            class="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs outline-none focus:border-blue-500 focus:bg-white"
+          >
+        </div>
+
+        <div>
+          <label class="block font-medium text-slate-700 mb-1">Оплата</label>
+          <select name="paymentMethod" class="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs outline-none focus:border-blue-500 cursor-pointer">
+            <option value="При получении">При получении курьеру</option>
+            <option value="Онлайн картой">Онлайн картой</option>
+            <option value="СБП">СБП (по QR-коду)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-medium text-slate-700 mb-1">Комментарий к заказу</label>
+          <textarea 
+            name="comment" 
+            rows="2" 
+            placeholder="Код домофона, этаж и др." 
+            class="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs outline-none focus:border-blue-500 focus:bg-white"
+          ></textarea>
+        </div>
+
+        <!-- Mini order summary inside checkout -->
+        <div class="bg-blue-50/70 p-3 rounded-xl border border-blue-100 flex items-center justify-between text-xs">
+          <span class="text-slate-600">К оплате:</span>
+          <strong id="checkoutTotalDisplay" class="text-sm font-bold text-blue-700">0 ₽</strong>
+        </div>
+
+        <button 
+          type="submit" 
+          id="submitOrderBtn" 
+          class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-lg shadow-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+        >
+          <i data-lucide="check-circle" class="w-4 h-4"></i>
+          <span>Подтвердить заказ</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Order Success Modal (Compact) -->
+  <div id="orderSuccessModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 hidden items-center justify-center p-3">
+    <div class="bg-white rounded-2xl max-w-xs w-full p-6 text-center modal-enter shadow-2xl">
+      <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-3">
+        <i data-lucide="check" class="w-6 h-6"></i>
+      </div>
+      <h3 class="text-base font-bold text-slate-900 mb-1">Заказ принят!</h3>
+      <p class="text-xs text-slate-600 mb-4">
+        Номер заказа: <strong id="successOrderNumber" class="text-blue-600 font-mono text-sm">#ORD-1004</strong>
+      </p>
+      <button id="closeSuccessBtn" class="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs rounded-lg shadow-xs transition-all cursor-pointer">
+        Отлично
+      </button>
+    </div>
+  </div>
+
+  <!-- App Storefront Logic -->
+  <script src="/js/store.js"></script>
+</body>
+</html>

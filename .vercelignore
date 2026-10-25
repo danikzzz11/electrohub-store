@@ -1,0 +1,6 @@
+node_modules
+.vercel
+*.log
+shop.db*
+.env
+.env.local

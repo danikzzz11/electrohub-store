@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ElectroHub CRM — Панель управления магазином</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="/css/style.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              600: '#2563eb',
+              700: '#1d4ed8',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex antialiased">
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="fixed top-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- ----------------------------------------------------------------------- -->
+  <!-- 1. LOGIN SCREEN (Visible when not authenticated)                        -->
+  <!-- ----------------------------------------------------------------------- -->
+  <div id="loginScreen" class="fixed inset-0 z-50 bg-slate-900 flex items-center justify-center p-4">
+    <div class="max-w-md w-full bg-white rounded-3xl shadow-2xl p-8 relative overflow-hidden">
+      <!-- Decorative background blur -->
+      <div class="absolute -top-12 -right-12 w-40 h-40 bg-blue-500/20 rounded-full blur-2xl pointer-events-none"></div>
+
+      <div class="text-center mb-6">
+        <div class="w-14 h-14 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center text-white mx-auto mb-3 shadow-lg shadow-blue-500/30">
+          <i data-lucide="shield-check" class="w-8 h-8"></i>
+        </div>
+        <h2 class="text-2xl font-black text-slate-900 tracking-tight">Вход в CRM ElectroHub</h2>
+        <p class="text-xs text-slate-500 mt-1">Закрытая панель администратора и оператора</p>
+      </div>
+
+      <!-- Credentials Hint Banner -->
+      <div class="mb-5 p-3.5 bg-blue-50 border border-blue-200 rounded-2xl text-xs text-blue-900">
+        <div class="font-bold flex items-center gap-1.5 mb-1 text-blue-700">
+          <i data-lucide="key" class="w-4 h-4"></i> Данные для входа:
+        </div>
+        <div class="flex items-center justify-between font-mono bg-white px-3 py-1.5 rounded-xl border border-blue-100 mt-1">
+          <span>Логин: <strong>danik</strong></span>
+          <span>Пароль: <strong>20112005</strong></span>
+        </div>
+      </div>
+
+      <form id="loginForm" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Имя пользователя (Логин)</label>
+          <div class="relative">
+            <input 
+              type="text" 
+              id="loginUsername" 
+              required 
+              value="danik"
+              placeholder="danik" 
+              class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-blue-500 focus:bg-white transition-all font-medium"
+            >
+            <i data-lucide="user" class="w-4 h-4 absolute left-3.5 top-3 text-slate-400"></i>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Пароль</label>
+          <div class="relative">
+            <input 
+              type="password" 
+              id="loginPassword" 
+              required 
+              value="20112005"
+              placeholder="••••••••" 
+              class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-blue-500 focus:bg-white transition-all font-medium"
+            >
+            <i data-lucide="lock" class="w-4 h-4 absolute left-3.5 top-3 text-slate-400"></i>
+          </div>
+        </div>
+
+        <button 
+          type="submit" 
+          id="loginSubmitBtn" 
+          class="w-full py-3 bg-blue-600 hover:bg-blue-700 active:scale-[0.99] text-white font-bold text-sm rounded-xl shadow-lg shadow-blue-600/30 transition-all flex items-center justify-center gap-2 mt-2"
+        >
+          <i data-lucide="log-in" class="w-4 h-4"></i>
+          <span>Войти в систему</span>
+        </button>
+      </form>
+
+      <div class="mt-6 text-center">
+        <a href="/" class="text-xs text-slate-500 hover:text-blue-600 transition-colors inline-flex items-center gap-1">
+          <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> Вернуться в интернет-магазин
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ----------------------------------------------------------------------- -->
+  <!-- 2. ADMIN DASHBOARD & CRM LAYOUT (Visible when authenticated)            -->
+  <!-- ----------------------------------------------------------------------- -->
+  <div id="adminApp" class="hidden flex-1 flex flex-col md:flex-row min-h-screen">
+
+    <!-- Sidebar -->
+    <aside class="w-full md:w-64 bg-slate-900 text-white flex flex-col justify-between p-5 border-r border-slate-800 flex-shrink-0">
+      <div>
+        <!-- Brand -->
+        <div class="flex items-center gap-3 px-2 py-3 mb-6">
+          <div class="w-10 h-10 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center text-white shadow-md shadow-blue-500/20">
+            <i data-lucide="shield-check" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <h1 class="font-bold text-base tracking-tight text-white">ElectroHub CRM</h1>
+            <span class="text-[11px] text-blue-400 font-semibold block">Панель управления</span>
+          </div>
+        </div>
+
+        <!-- Manager Profile Chip -->
+        <div class="bg-slate-800/80 p-3 rounded-2xl border border-slate-700/60 flex items-center gap-3 mb-6">
+          <div class="w-8 h-8 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-xs">
+            D
+          </div>
+          <div class="min-w-0 flex-1">
+            <div class="text-xs font-bold text-white truncate" id="adminFullName">Даниил</div>
+            <div class="text-[10px] text-emerald-400 flex items-center gap-1 font-medium">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> В сети (danik)
+            </div>
+          </div>
+        </div>
+
+        <!-- Navigation Links -->
+        <nav class="space-y-1.5">
+          <button data-tab="dashboard" class="nav-btn active w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all bg-blue-600 text-white shadow-md shadow-blue-600/30">
+            <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+            <span>Дашборд</span>
+          </button>
+
+          <button data-tab="orders" class="nav-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all text-slate-300 hover:bg-slate-800 hover:text-white">
+            <div class="flex items-center gap-3">
+              <i data-lucide="shopping-bag" class="w-4 h-4 text-blue-400"></i>
+              <span>Заказы</span>
+            </div>
+            <span id="navOrdersBadge" class="text-[11px] bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded-full">0</span>
+          </button>
+
+          <button data-tab="products" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all text-slate-300 hover:bg-slate-800 hover:text-white">
+            <i data-lucide="package" class="w-4 h-4 text-emerald-400"></i>
+            <span>Товары каталога</span>
+          </button>
+
+          <button data-tab="customers" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all text-slate-300 hover:bg-slate-800 hover:text-white">
+            <i data-lucide="users" class="w-4 h-4 text-amber-400"></i>
+            <span>Клиенты (CRM)</span>
+          </button>
+        </nav>
+      </div>
+
+      <!-- Bottom Actions -->
+      <div class="pt-6 border-t border-slate-800 space-y-2">
+        <a href="/" target="_blank" class="w-full flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
+          <i data-lucide="external-link" class="w-4 h-4"></i>
+          <span>Открыть витрину</span>
+        </a>
+
+        <button id="logoutBtn" class="w-full flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 transition-colors">
+          <i data-lucide="log-out" class="w-4 h-4"></i>
+          <span>Выйти из системы</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 flex flex-col min-w-0 bg-slate-100 overflow-y-auto">
+
+      <!-- Top Header -->
+      <header class="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between sticky top-0 z-20">
+        <div>
+          <h2 id="currentTabTitle" class="text-xl font-extrabold text-slate-900">Обзор и статистика</h2>
+          <p id="currentTabSubtitle" class="text-xs text-slate-500">Ключевые показатели работы интернет-магазина</p>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <button id="refreshDataBtn" class="p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition-all" title="Обновить данные">
+            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- View Containers -->
+      <div class="p-6 flex-1 space-y-6">
+
+        <!-- ----------------------------------------------------------------- -->
+        <!-- TAB 1: DASHBOARD                                                  -->
+        <!-- ----------------------------------------------------------------- -->
+        <section id="tab-dashboard" class="tab-pane space-y-6">
+          <!-- 4 KPI Cards -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <!-- Revenue -->
+            <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm flex items-center justify-between">
+              <div>
+                <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Выручка (активные)</span>
+                <h3 id="statRevenue" class="text-2xl font-black text-slate-900 mt-1">0 ₽</h3>
+                <span class="text-[11px] text-emerald-600 font-semibold mt-1 inline-flex items-center gap-1">
+                  <i data-lucide="trending-up" class="w-3.5 h-3.5"></i> Доставленные заказы
+                </span>
+              </div>
+              <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center">
+                <i data-lucide="wallet" class="w-6 h-6"></i>
+              </div>
+            </div>
+
+            <!-- Orders Count -->
+            <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm flex items-center justify-between">
+              <div>
+                <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Всего заказов</span>
+                <h3 id="statOrders" class="text-2xl font-black text-slate-900 mt-1">0</h3>
+                <span id="statPendingOrders" class="text-[11px] text-blue-600 font-semibold mt-1 inline-block">
+                  0 требуют обработки
+                </span>
+              </div>
+              <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center">
+                <i data-lucide="shopping-bag" class="w-6 h-6"></i>
+              </div>
+            </div>
+
+            <!-- Customers -->
+            <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm flex items-center justify-between">
+              <div>
+                <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">База клиентов</span>
+                <h3 id="statCustomers" class="text-2xl font-black text-slate-900 mt-1">0</h3>
+                <span class="text-[11px] text-purple-600 font-semibold mt-1 inline-block">
+                  CRM профили
+                </span>
+              </div>
+              <div class="w-12 h-12 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center">
+                <i data-lucide="users" class="w-6 h-6"></i>
+              </div>
+            </div>
+
+            <!-- Products / Low stock -->
+            <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm flex items-center justify-between">
+              <div>
+                <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Товары в наличии</span>
+                <h3 id="statProducts" class="text-2xl font-black text-slate-900 mt-1">0</h3>
+                <span id="statLowStock" class="text-[11px] text-amber-600 font-semibold mt-1 inline-block">
+                  0 с низким остатком
+                </span>
+              </div>
+              <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center">
+                <i data-lucide="package" class="w-6 h-6"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Orders inside Dashboard -->
+          <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+              <h3 class="font-bold text-slate-900 text-base">Последние поступившие заказы</h3>
+              <button onclick="switchTab('orders')" class="text-xs font-semibold text-blue-600 hover:underline">
+                Все заказы →
+              </button>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-slate-50 text-slate-500 uppercase font-semibold border-b border-slate-100">
+                  <tr>
+                    <th class="px-5 py-3">№ Заказа</th>
+                    <th class="px-5 py-3">Дата</th>
+                    <th class="px-5 py-3">Клиент</th>
+                    <th class="px-5 py-3">Сумма</th>
+                    <th class="px-5 py-3">Статус</th>
+                    <th class="px-5 py-3 text-right">Действие</th>
+                  </tr>
+                </thead>
+                <tbody id="recentOrdersTableBody" class="divide-y divide-slate-100">
+                  <!-- Injected rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ----------------------------------------------------------------- -->
+        <!-- TAB 2: PRODUCTS MANAGEMENT                                        -->
+        <!-- ----------------------------------------------------------------- -->
+        <section id="tab-products" class="tab-pane hidden space-y-4">
+          <!-- Top Toolbar -->
+          <div class="bg-white p-4 rounded-3xl border border-slate-200 shadow-sm flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center gap-3 flex-1 min-w-[280px]">
+              <div class="relative flex-1">
+                <input 
+                  type="text" 
+                  id="adminProductSearch" 
+                  placeholder="Поиск товаров по названию или описанию..." 
+                  class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-blue-500 focus:bg-white"
+                >
+                <i data-lucide="search" class="w-4 h-4 absolute left-3 top-2.5 text-slate-400"></i>
+              </div>
+              
+              <select id="adminProductCategoryFilter" class="bg-slate-50 border border-slate-200 text-slate-700 text-xs rounded-xl px-3 py-2 outline-none cursor-pointer">
+                <option value="">Все категории</option>
+                <!-- populated dynamically -->
+              </select>
+            </div>
+
+            <button 
+              id="openAddProductModalBtn" 
+              class="px-4 py-2 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold text-xs rounded-xl shadow-md shadow-blue-600/20 transition-all flex items-center gap-2"
+            >
+              <i data-lucide="plus-circle" class="w-4 h-4"></i>
+              <span>Добавить товар</span>
+            </button>
+          </div>
+
+          <!-- Products Table -->
+          <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-slate-50 text-slate-500 uppercase font-semibold border-b border-slate-100">
+                  <tr>
+                    <th class="px-5 py-3">Товар</th>
+                    <th class="px-5 py-3">Категория</th>
+                    <th class="px-5 py-3">Цена</th>
+                    <th class="px-5 py-3">Остаток</th>
+                    <th class="px-5 py-3 text-right">Действия</th>
+                  </tr>
+                </thead>
+                <tbody id="adminProductsTableBody" class="divide-y divide-slate-100">
+                  <!-- Dynamically populated -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ----------------------------------------------------------------- -->
+        <!-- TAB 3: ORDERS MANAGEMENT                                          -->
+        <!-- ----------------------------------------------------------------- -->
+        <section id="tab-orders" class="tab-pane hidden space-y-4">
+          <!-- Status Tabs & Search -->
+          <div class="bg-white p-4 rounded-3xl border border-slate-200 shadow-sm flex flex-wrap items-center justify-between gap-4">
+            
+            <!-- Status Tabs -->
+            <div class="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-1 sm:pb-0" id="orderStatusFilterTabs">
+              <button data-status="all" class="order-filter-pill active px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-blue-600 text-white">Все</button>
+              <button data-status="новый" class="order-filter-pill px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200">Новые</button>
+              <button data-status="в_обработке" class="order-filter-pill px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200">В обработке</button>
+              <button data-status="отправлен" class="order-filter-pill px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200">Отправлены</button>
+              <button data-status="доставлен" class="order-filter-pill px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200">Доставлены</button>
+              <button data-status="отменен" class="order-filter-pill px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200">Отменены</button>
+            </div>
+
+            <!-- Search input -->
+            <div class="relative w-full sm:w-64">
+              <input 
+                type="text" 
+                id="adminOrderSearch" 
+                placeholder="Поиск по №, имени, телефону..." 
+                class="w-full pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-blue-500 focus:bg-white"
+              >
+              <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-400"></i>
+            </div>
+          </div>
+
+          <!-- Orders Table -->
+          <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-slate-50 text-slate-500 uppercase font-semibold border-b border-slate-100">
+                  <tr>
+                    <th class="px-5 py-3">№ Заказа</th>
+                    <th class="px-5 py-3">Дата создания</th>
+                    <th class="px-5 py-3">Клиент</th>
+                    <th class="px-5 py-3">Состав и сумма</th>
+                    <th class="px-5 py-3">Статус заказа</th>
+                    <th class="px-5 py-3 text-right">Детали</th>
+                  </tr>
+                </thead>
+                <tbody id="adminOrdersTableBody" class="divide-y divide-slate-100">
+                  <!-- Injected rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ----------------------------------------------------------------- -->
+        <!-- TAB 4: CUSTOMERS CRM                                              -->
+        <!-- ----------------------------------------------------------------- -->
+        <section id="tab-customers" class="tab-pane hidden space-y-4">
+          <!-- Top search -->
+          <div class="bg-white p-4 rounded-3xl border border-slate-200 shadow-sm flex items-center justify-between gap-4">
+            <div class="relative flex-1 max-w-md">
+              <input 
+                type="text" 
+                id="adminCustomerSearch" 
+                placeholder="Поиск клиента по имени, телефону, email..." 
+                class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-blue-500 focus:bg-white"
+              >
+              <i data-lucide="search" class="w-4 h-4 absolute left-3 top-2.5 text-slate-400"></i>
+            </div>
+
+            <span class="text-xs text-slate-500 font-medium">Всего в базе: <strong id="crmTotalCustomersCount" class="text-slate-800">0</strong> клиентов</span>
+          </div>
+
+          <!-- Customers Table -->
+          <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-slate-50 text-slate-500 uppercase font-semibold border-b border-slate-100">
+                  <tr>
+                    <th class="px-5 py-3">Клиент</th>
+                    <th class="px-5 py-3">Контакты</th>
+                    <th class="px-5 py-3">Город / Адрес</th>
+                    <th class="px-5 py-3">Заказов</th>
+                    <th class="px-5 py-3">LTV (Сумма)</th>
+                    <th class="px-5 py-3">Сегмент</th>
+                    <th class="px-5 py-3 text-right">CRM Карточка</th>
+                  </tr>
+                </thead>
+                <tbody id="adminCustomersTableBody" class="divide-y divide-slate-100">
+                  <!-- Injected rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- ----------------------------------------------------------------------- -->
+  <!-- MODAL 1: ADD / EDIT PRODUCT                                             -->
+  <!-- ----------------------------------------------------------------------- -->
+  <div id="productModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl modal-enter">
+      <div class="p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+        <h3 id="productModalTitle" class="font-bold text-slate-900 text-base">Добавить новый товар</h3>
+        <button id="closeProductModalBtn" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-xl">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="productForm" class="p-6 space-y-4 max-h-[75vh] overflow-y-auto">
+        <input type="hidden" id="editProductId" name="id">
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Название товара *</label>
+          <input type="text" id="prodName" name="name" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-blue-500">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Категория *</label>
+            <select id="prodCategory" name="category_id" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-blue-500 cursor-pointer">
+              <!-- Dynamically populated -->
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Остаток на складе *</label>
+            <input type="number" id="prodStock" name="stock" min="0" required value="10" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-blue-500">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Цена продажи (₽) *</label>
+            <input type="number" id="prodPrice" name="price" min="0" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-blue-500">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Старая цена (₽)</label>
+            <input type="number" id="prodOldPrice" name="old_price" min="0" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-blue-500">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Ссылка на фото (URL)</label>
+          <input type="url" id="prodImage" name="image_url" placeholder="https://..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-blue-500">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Краткие характеристики</label>
+          <input type="text" id="prodSpecs" name="specs" placeholder="Память: 256 ГБ | Экран: 6.7 OLED" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-blue-500">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Полное описание</label>
+          <textarea id="prodDesc" name="description" rows="3" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-blue-500"></textarea>
+        </div>
+
+        <button type="submit" class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-md transition-all">
+          Сохранить товар
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ----------------------------------------------------------------------- -->
+  <!-- MODAL 2: ORDER DETAILS & PROCESSING                                     -->
+  <!-- ----------------------------------------------------------------------- -->
+  <div id="orderDetailModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-2xl w-full overflow-hidden shadow-2xl modal-enter flex flex-col max-h-[85vh]">
+      <div class="p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+        <div class="flex items-center gap-3">
+          <h3 id="modalOrderNumber" class="font-bold text-slate-900 text-lg">Заказ #ORD-1001</h3>
+          <span id="modalOrderStatusBadge" class="text-xs font-bold px-2.5 py-1 rounded-full"></span>
+        </div>
+        <button id="closeOrderModalBtn" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-xl">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="p-6 space-y-6 overflow-y-auto flex-1">
+        <!-- Quick Status Change Bar -->
+        <div class="bg-blue-50/70 p-4 rounded-2xl border border-blue-200 flex flex-wrap items-center justify-between gap-3">
+          <div class="text-xs">
+            <span class="text-slate-500 block">Быстрое изменение статуса:</span>
+            <strong class="text-slate-800">Перевести заказ в другой этап</strong>
+          </div>
+          <div class="flex items-center gap-2">
+            <select id="modalStatusSelect" class="bg-white border border-slate-300 text-slate-800 text-xs rounded-xl px-3 py-1.5 font-semibold outline-none cursor-pointer">
+              <option value="новый">Новый</option>
+              <option value="в_обработке">В обработке</option>
+              <option value="отправлен">Отправлен</option>
+              <option value="доставлен">Доставлен</option>
+              <option value="отменен">Отменен</option>
+            </select>
+            <button id="saveOrderStatusBtn" class="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-sm transition-all">
+              Применить
+            </button>
+          </div>
+        </div>
+
+        <!-- Customer & Delivery Info Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+          <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+            <div class="font-bold text-slate-800 mb-2 flex items-center gap-1.5">
+              <i data-lucide="user" class="w-4 h-4 text-blue-600"></i> Клиент
+            </div>
+            <p id="modalCustName" class="font-semibold text-slate-900"></p>
+            <p id="modalCustPhone" class="text-slate-600"></p>
+            <p id="modalCustEmail" class="text-slate-500"></p>
+            <button id="modalOpenCrmBtn" class="mt-2 text-blue-600 hover:underline font-semibold flex items-center gap-1">
+              <i data-lucide="contact" class="w-3.5 h-3.5"></i> Открыть профиль в CRM
+            </button>
+          </div>
+
+          <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+            <div class="font-bold text-slate-800 mb-2 flex items-center gap-1.5">
+              <i data-lucide="truck" class="w-4 h-4 text-emerald-600"></i> Доставка и оплата
+            </div>
+            <p class="text-slate-600"><strong class="text-slate-800">Адрес:</strong> <span id="modalDeliveryAddress"></span></p>
+            <p class="text-slate-600"><strong class="text-slate-800">Оплата:</strong> <span id="modalPaymentMethod"></span></p>
+            <p class="text-slate-600 mt-1"><strong class="text-slate-800">Комментарий:</strong> <span id="modalComment" class="italic text-slate-500"></span></p>
+          </div>
+        </div>
+
+        <!-- Items Table -->
+        <div>
+          <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider mb-2">Состав заказа</h4>
+          <div class="border border-slate-200 rounded-2xl overflow-hidden">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 text-slate-500 uppercase font-semibold">
+                <tr>
+                  <th class="px-4 py-2.5">Товар</th>
+                  <th class="px-4 py-2.5">Цена</th>
+                  <th class="px-4 py-2.5">Кол-во</th>
+                  <th class="px-4 py-2.5 text-right">Сумма</th>
+                </tr>
+              </thead>
+              <tbody id="modalOrderItemsBody" class="divide-y divide-slate-100">
+                <!-- Items list -->
+              </tbody>
+              <tfoot class="bg-slate-50 font-bold">
+                <tr>
+                  <td colspan="3" class="px-4 py-3 text-slate-800">Итого:</td>
+                  <td id="modalOrderTotal" class="px-4 py-3 text-right text-blue-600 text-sm"></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ----------------------------------------------------------------------- -->
+  <!-- MODAL 3: CRM CUSTOMER CARD WITH FULL ORDER HISTORY & NOTES              -->
+  <!-- ----------------------------------------------------------------------- -->
+  <div id="customerCrmModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-3xl w-full overflow-hidden shadow-2xl modal-enter flex flex-col max-h-[88vh]">
+      <!-- Header -->
+      <div class="p-6 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 bg-blue-600 text-white rounded-2xl flex items-center justify-center font-bold text-base shadow-md">
+            CRM
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 id="crmCustName" class="font-black text-slate-900 text-lg">Алексей Смирнов</h3>
+              <span id="crmCustSegmentBadge" class="text-xs font-bold px-2 py-0.5 rounded-full">VIP</span>
+            </div>
+            <p id="crmCustPhone" class="text-xs text-slate-500 font-mono mt-0.5">+7 (999) 111-22-33</p>
+          </div>
+        </div>
+        <button id="closeCrmModalBtn" class="p-2 text-slate-400 hover:text-slate-600 rounded-xl">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="p-6 space-y-6 overflow-y-auto flex-1 text-xs">
+        <!-- KPI Metrics Grid -->
+        <div class="grid grid-cols-3 gap-3">
+          <div class="bg-blue-50/60 p-3.5 rounded-2xl border border-blue-100 text-center">
+            <span class="text-slate-500 text-[11px] block">LTV (Всего покупок)</span>
+            <strong id="crmCustLtv" class="text-base font-black text-blue-700">0 ₽</strong>
+          </div>
+          <div class="bg-emerald-50/60 p-3.5 rounded-2xl border border-emerald-100 text-center">
+            <span class="text-slate-500 text-[11px] block">Всего заказов</span>
+            <strong id="crmCustOrdersCount" class="text-base font-black text-emerald-700">0</strong>
+          </div>
+          <div class="bg-purple-50/60 p-3.5 rounded-2xl border border-purple-100 text-center">
+            <span class="text-slate-500 text-[11px] block">Средний чек (AOV)</span>
+            <strong id="crmCustAov" class="text-base font-black text-purple-700">0 ₽</strong>
+          </div>
+        </div>
+
+        <!-- Contact & Address Details -->
+        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-1">
+          <div class="font-bold text-slate-800 mb-1">Контактные данные:</div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-slate-600">
+            <p><strong class="text-slate-700">Email:</strong> <span id="crmCustEmail">—</span></p>
+            <p><strong class="text-slate-700">Адрес доставки:</strong> <span id="crmCustAddress">—</span></p>
+          </div>
+        </div>
+
+        <!-- Full Orders History Timeline -->
+        <div>
+          <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider mb-2 flex items-center gap-1.5">
+            <i data-lucide="history" class="w-4 h-4 text-blue-600"></i> История заказов клиента
+          </h4>
+          <div id="crmOrdersTimeline" class="space-y-3">
+            <!-- Timeline items rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- CRM Notes & Manager Comments -->
+        <div>
+          <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider mb-2 flex items-center gap-1.5">
+            <i data-lucide="message-square" class="w-4 h-4 text-amber-600"></i> Заметки менеджера (CRM Notes)
+          </h4>
+
+          <!-- Add Note Form -->
+          <form id="addCrmNoteForm" class="flex gap-2 mb-3">
+            <input 
+              type="text" 
+              id="newCrmNoteInput" 
+              required 
+              placeholder="Добавить заметку о клиенте (предпочтения, договоренности)..." 
+              class="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-blue-500"
+            >
+            <button type="submit" class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl text-xs transition-colors flex items-center gap-1">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+              <span>Записать</span>
+            </button>
+          </form>
+
+          <!-- Notes list -->
+          <div id="crmNotesList" class="space-y-2">
+            <!-- Injected notes -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin JavaScript Logic -->
+  <script src="/js/admin.js"></script>
+</body>
+</html>
